@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "includeFiles": "HDR/app.py",
+      "excludeFiles": "{assets/**,webhdr/**,resources/**,node_modules/**,HDR/uploads/**,HDR/templates/**,**/*.exe,**/*.html,**/*.css,**/*.php}"
+    }
+  },
+  "rewrites": [
+    { "source": "/process", "destination": "/api" },
+    { "source": "/hdr", "destination": "/HDR/templates/index.html" }
+  ]
+}

@@ -15,7 +15,15 @@ except ImportError:
     PIL_AVAILABLE = False
 
 app = Flask(__name__)
-os.makedirs('uploads', exist_ok=True)
+
+# Na Vercel o sistema de arquivos é somente leitura (exceto /tmp).
+ON_VERCEL = bool(os.environ.get('VERCEL'))
+if not ON_VERCEL:
+    os.makedirs('uploads', exist_ok=True)
+
+# Na Vercel, requisição e resposta têm limite de 4,5 MB: limita o lado maior
+# das imagens processadas para manter a resposta abaixo desse teto.
+MAX_IMAGE_SIDE = int(os.environ.get('MAX_IMAGE_SIDE', '2000' if ON_VERCEL else '0'))
 
 # ─────────────────────────────────────────────
 #  CONSTANTES
@@ -707,6 +715,13 @@ def process():
 
         images = resize_to_ref(images)
 
+        if MAX_IMAGE_SIDE > 0:
+            h0, w0 = images[0].shape[:2]
+            if max(h0, w0) > MAX_IMAGE_SIDE:
+                k = MAX_IMAGE_SIDE / float(max(h0, w0))
+                size = (int(round(w0 * k)), int(round(h0 * k)))
+                images = [cv2.resize(i, size, interpolation=cv2.INTER_AREA) for i in images]
+
         # ── Aplica curva de resposta (se fornecida) ───────────────
         if rsp_curve is not None:
             images = apply_rsp_to_images(images, rsp_curve)
@@ -728,6 +743,18 @@ def process():
             if all(t is not None and t > 0 for t in exif):
                 exp_times  = exif
                 exp_source = "exif"
+
+        # Tempos lidos do EXIF no navegador (as imagens são reduzidas antes
+        # do envio e perdem o EXIF no processo).
+        if exp_times is None:
+            try:
+                client_times = json.loads(request.form.get('exposure_times', '[]'))
+                if (client_times and len(client_times) == len(images)
+                        and all(t is not None and float(t) > 0 for t in client_times)):
+                    exp_times  = [float(t) for t in client_times]
+                    exp_source = "exif"
+            except Exception:
+                pass
 
         # ── Alinhamento ───────────────────────────────────────────
         if opt_align:
@@ -807,7 +834,8 @@ def process():
         return jsonify({
             "hdr_preview":       _b64(preview),
             "false_color_clean": _b64(fc_clean),
-            "false_color":       _b64(fc_iso),
+            # só envia a versão com isolinhas quando ela difere da limpa
+            "false_color":       _b64(fc_iso) if drawn_count else "",
             "colorbar":          _b64(colorbar),
             "lut_preview":       scale_bar,
             "stats":             stats,

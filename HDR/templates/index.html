@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" href="../assets/img/Camera_Icon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../assets/img/Camera_Icon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Lobster&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -297,13 +297,14 @@
   <!-- NAV -->
   <header class="bg-cyan-900/90 backdrop-blur-sm sticky top-0 z-50 border-b border-cyan-800/50">
     <nav class="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
-      <a href="../index.html" class="font-Lobster text-lg text-white hover:text-yellow-400 transition-colors flex items-center gap-2">
+      <a href="../../index.html" class="font-Lobster text-lg text-white hover:text-yellow-400 transition-colors flex items-center gap-2">
         <i class="ri-camera-3-fill text-yellow-400"></i> Light Photo Analyzer
       </a>
       <div class="hidden md:flex items-center gap-6 text-sm font-semibold">
-        <a href="../index.html#analyzer" class="nav-link text-cyan-300">Luminance Analyzer</a>
-        <a href="../webhdr/hdr.html"     class="nav-link text-cyan-300">WebHDR</a>
-        <a href="../resources/radiance/radiance.html" class="nav-link text-cyan-300">Radiance</a>
+        <a href="../../index.html#analyzer" class="nav-link text-cyan-300">Luminance Analyzer</a>
+        <a href="../../webhdr/hdr.html"     class="nav-link text-cyan-300">WebHDR</a>
+        <a href="../../resources/radiance/radiance.html" class="nav-link text-cyan-300">Radiance</a>
+        <a href="../../agradecimentos.html" class="nav-link text-cyan-300">Agradecimentos</a>
       </div>
     </nav>
   </header>
@@ -686,7 +687,7 @@
   </main>
 
   <footer class="text-center text-xs text-slate-600 py-6 border-t border-slate-800 mt-12">
-    <a href="../index.html" class="text-cyan-700 hover:text-cyan-500 transition-colors">← Voltar para Light Photo Analyzer</a>
+    <a href="../../index.html" class="text-cyan-700 hover:text-cyan-500 transition-colors">← Voltar para Light Photo Analyzer</a>
     <span class="mx-3">·</span>© 2025 Light Photo Analyzer
   </footer>
 
@@ -854,6 +855,72 @@
   }
 
   /* ══════════════════════════════════════════════════════════════
+     PREPARAR ENVIO — reduz as fotos no navegador
+     O servidor online (Vercel) aceita no máximo 4,5 MB por requisição.
+     Fotos grandes são redimensionadas e o tempo de exposição do EXIF é
+     lido antes, já que o redimensionamento descarta o EXIF.
+     ══════════════════════════════════════════════════════════════ */
+  const UPLOAD_BUDGET = 3.8 * 1024 * 1024;   // margem abaixo dos 4,5 MB
+
+  async function readExposureTime(file){
+    try{
+      const buf=await file.slice(0, 256*1024).arrayBuffer();
+      const v=new DataView(buf);
+      if(v.getUint16(0)!==0xFFD8) return null;          // não é JPEG
+      let off=2;
+      while(off+4<v.byteLength){
+        const marker=v.getUint16(off), len=v.getUint16(off+2);
+        if(marker===0xFFE1 && v.getUint32(off+4)===0x45786966){   // "Exif"
+          const t=off+10, le=v.getUint16(t)===0x4949;
+          const u16=o=>v.getUint16(t+o,le), u32=o=>v.getUint32(t+o,le);
+          const findTag=(ifd,tag)=>{
+            const n=u16(ifd);
+            for(let i=0;i<n;i++){ const e=ifd+2+i*12; if(u16(e)===tag) return e; }
+            return -1;
+          };
+          const readRational=e=>{ const o=u32(e+8); const d=u32(o+4); return d?u32(o)/d:null; };
+          const ifd0=u32(4);
+          let e=findTag(ifd0,0x829A);
+          if(e>=0) return readRational(e);
+          const sub=findTag(ifd0,0x8769);                // ponteiro p/ Exif SubIFD
+          if(sub<0) return null;
+          e=findTag(u32(sub+8),0x829A);                  // ExposureTime
+          return e>=0 ? readRational(e) : null;
+        }
+        if((marker & 0xFF00)!==0xFF00) break;
+        off+=2+len;
+      }
+    }catch(_){}
+    return null;
+  }
+
+  async function downscale(file, maxSide, quality){
+    const bmp=await createImageBitmap(file);
+    const k=Math.min(1, maxSide/Math.max(bmp.width,bmp.height));
+    const w=Math.round(bmp.width*k), h=Math.round(bmp.height*k);
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(bmp,0,0,w,h);
+    bmp.close && bmp.close();
+    const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',quality));
+    const name=file.name.replace(/\.[^.]+$/,'')+'.jpg';
+    return new File([blob], name, {type:'image/jpeg'});
+  }
+
+  async function prepareUploads(files){
+    const total=files.reduce((a,f)=>a+f.size,0);
+    if(total<=UPLOAD_BUDGET) return {files, times:null};
+    const times=await Promise.all(files.map(readExposureTime));
+    const steps=[[2000,0.92],[1600,0.88],[1280,0.85],[1024,0.82]];
+    let out=files;
+    for(const [side,q] of steps){
+      try{ out=await Promise.all(files.map(f=>downscale(f,side,q))); }
+      catch(_){ return {files, times:null}; }     // formato que o navegador não decodifica
+      if(out.reduce((a,f)=>a+f.size,0)<=UPLOAD_BUDGET) break;
+    }
+    return {files:out, times: times.every(t=>t>0) ? times : null};
+  }
+
+  /* ══════════════════════════════════════════════════════════════
      PROCESSAR (servidor)
      ══════════════════════════════════════════════════════════════ */
   async function processar() {
@@ -865,7 +932,9 @@
     btnProcessar.innerHTML='<i class="ri-loader-4-line spin text-lg"></i> Processando…';
 
     const fd=new FormData();
-    allFiles.forEach(f=>fd.append('images',f));
+    const prepared=await prepareUploads(allFiles);
+    prepared.files.forEach(f=>fd.append('images',f));
+    if(prepared.times) fd.append('exposure_times', JSON.stringify(prepared.times));
     fd.append('auto_align',      document.getElementById('chkAlign').checked);
     fd.append('show_isolines',   false);   // isolinhas agora são client-side
     fd.append('isoline_density', 'normal');

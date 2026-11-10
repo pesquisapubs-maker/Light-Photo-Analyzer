@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agradecimentos · Light Photo Analyzer</title>
+  <meta name="description" content="Agradecimento a Axel Jacobs, criador do JALOXA, base para o desenvolvimento do Light Photo Analyzer.">
+  <link rel="shortcut icon" href="assets/img/Camera_Icon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Lobster&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            Jost: ['Jost', 'sans-serif'],
+            Lobster: ['Lobster', 'cursive'],
+            Mono: ['Space Mono', 'monospace'],
+          },
+          animation: {
+            movingY: 'movingY 3s ease-in-out infinite',
+            fadeUp: 'fadeUp .9s ease both',
+          },
+          keyframes: {
+            movingY: { '0%,100%': {transform:'translateY(0)'}, '50%': {transform:'translateY(-14px)'} },
+            fadeUp: { from:{opacity:'0',transform:'translateY(16px)'}, to:{opacity:'1',transform:'translateY(0)'} },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { overflow-x: hidden; scroll-behavior: smooth; }
+    body { background-color: #164e63; color: white; font-family: 'Jost', sans-serif; letter-spacing: 0.03em; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav-link { font-size: 1rem; font-weight: 600; transition: color .3s; }
+    .nav-link:hover, .nav-link.active { color: #eab308; }
+    .title { font-family: 'Lobster', cursive; color: #eab308; }
+    .btn { border: 1px solid #eab308; background: #eab308; border-radius: 6px; padding: 0.55rem 1.25rem; font-weight: 700; transition: opacity .3s, background .3s, color .3s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: #1a1a1a; }
+    .btn:hover { opacity: 0.88; }
+    .btn-outline { background: transparent; color: white; }
+    .btn-outline:hover { background: #eab308; color: #1a1a1a; opacity: 1; }
+    .letter p { text-indent: 2.2em; }
+    .letter p + p { margin-top: 1.25rem; }
+    .d1 { animation-delay: .15s; } .d2 { animation-delay: .3s; } .d3 { animation-delay: .45s; } .d4 { animation-delay: .6s; }
+    @media (prefers-reduced-motion: reduce) { .animate-fadeUp, .animate-movingY { animation: none !important; } }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="bg-cyan-900/95 backdrop-blur-sm sticky top-0 z-50 border-b border-yellow-500/20">
+    <nav class="container flex items-center justify-between h-16 sm:h-20">
+      <a href="index.html" class="font-Lobster text-xl sm:text-2xl text-white hover:text-yellow-400 transition-colors">Light Photo Analyzer</a>
+      <div class="hidden md:flex items-center gap-7">
+        <a href="index.html#home"     class="nav-link">Home</a>
+        <a href="index.html#analyzer" class="nav-link">Analisador</a>
+        <a href="HDR/templates/index.html" class="nav-link">Processar HDR</a>
+        <a href="agradecimentos.html" class="nav-link active">Agradecimentos</a>
+      </div>
+      <a href="index.html" class="md:hidden text-2xl hover:text-yellow-400 transition-colors" aria-label="Voltar para o início">
+        <i class="ri-home-5-line"></i>
+      </a>
+    </nav>
+  </header>
+
+  <main class="flex-1 relative overflow-hidden">
+    <!-- brilhos de fundo -->
+    <div class="w-72 h-72 bg-cyan-600 rounded-full blur-3xl opacity-25 absolute -top-10 -left-16 -z-0 pointer-events-none"></div>
+    <div class="w-64 h-64 bg-yellow-500 rounded-full blur-3xl opacity-10 absolute bottom-0 -right-10 -z-0 pointer-events-none"></div>
+
+    <section class="relative container pt-16 pb-24 md:pt-24">
+      <div class="flex flex-col items-center text-center gap-4 mb-12 animate-fadeUp">
+        <div class="w-16 h-16 rounded-full bg-yellow-500/15 border border-yellow-500/40 flex items-center justify-center animate-movingY">
+          <i class="ri-lightbulb-flash-line text-3xl text-yellow-400"></i>
+        </div>
+        <h1 class="title text-4xl md:text-5xl">Agradecimentos</h1>
+        <p class="text-cyan-200 max-w-xl">A Axel Jacobs e ao JALOXA, a origem do Light Photo Analyzer</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <article class="relative bg-cyan-950/60 border border-cyan-700/50 rounded-2xl shadow-2xl px-6 py-10 sm:px-12 sm:py-14 backdrop-blur-sm animate-fadeUp d1">
+          <i class="ri-double-quotes-l absolute top-4 left-5 text-5xl text-yellow-500/25"></i>
+
+          <div class="letter text-lg leading-relaxed text-cyan-50">
+            <p>
+              Gostaria de expressar meus sinceros agradecimentos a <strong class="text-yellow-400">Axel Jacobs</strong>, criador do programa <strong class="text-yellow-400">JALOXA</strong>, que serviu como base para o desenvolvimento do Light Photo Analyzer.
+            </p>
+            <p>
+              O trabalho desenvolvido por Axel foi fundamental para a construção desta ferramenta e representa uma importante contribuição para os estudos e pesquisas relacionados à iluminação e à análise de imagens HDR.
+            </p>
+            <p>
+              O projeto atual consiste no desenvolvimento de uma versão atualizada do site do Light Photo Analyzer, buscando aprimorar sua interface, funcionalidade e acessibilidade, além de ampliar as possibilidades de utilização da ferramenta. Essa continuidade só é possível graças à iniciativa e ao conhecimento estabelecidos pelo trabalho original.
+            </p>
+          </div>
+
+          <div class="mt-10 pt-6 border-t border-cyan-700/50 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center font-bold text-cyan-900 shrink-0">AJ</div>
+            <div class="text-left">
+              <p class="text-yellow-400 font-bold">Axel Jacobs</p>
+              <p class="text-sm text-cyan-300">Criador do JALOXA · pesquisa em iluminação, Radiance e HDR</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- O que veio do JALOXA -->
+        <div class="grid sm:grid-cols-3 gap-4 mt-8">
+          <div class="bg-cyan-800/40 border border-cyan-700/40 rounded-xl p-5 animate-fadeUp d2">
+            <i class="ri-camera-lens-line text-2xl text-yellow-400"></i>
+            <p class="font-semibold mt-2">WebHDR</p>
+            <p class="text-sm text-cyan-200 mt-1">Geração e análise de imagens HDR a partir de fotografias com várias exposições.</p>
+          </div>
+          <div class="bg-cyan-800/40 border border-cyan-700/40 rounded-xl p-5 animate-fadeUp d3">
+            <i class="ri-sun-line text-2xl text-yellow-400"></i>
+            <p class="font-semibold mt-2">Radiance</p>
+            <p class="text-sm text-cyan-200 mt-1">Tutoriais e materiais sobre simulação de iluminação natural e artificial.</p>
+          </div>
+          <div class="bg-cyan-800/40 border border-cyan-700/40 rounded-xl p-5 animate-fadeUp d4">
+            <i class="ri-palette-line text-2xl text-yellow-400"></i>
+            <p class="font-semibold mt-2">Falsa cor</p>
+            <p class="text-sm text-cyan-200 mt-1">Mapas de luminância em cd/m² para leitura visual do brilho de uma cena.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mt-12">
+          <a href="https://www.jaloxa.eu/" target="_blank" rel="noopener" class="btn">
+            <i class="ri-external-link-line"></i> Conhecer o JALOXA
+          </a>
+          <a href="index.html" class="btn btn-outline">
+            <i class="ri-arrow-left-line"></i> Voltar para o início
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-cyan-950 text-center text-xs text-cyan-400 py-6 border-t border-cyan-800/60">
+    <a href="index.html" class="hover:text-yellow-400 transition-colors">Light Photo Analyzer</a>
+    <span class="mx-2">·</span>
+    Baseado no trabalho original de Axel Jacobs (JALOXA)
+    <span class="mx-2">·</span>
+    © 2025
+  </footer>
+
+</body>
+</html>

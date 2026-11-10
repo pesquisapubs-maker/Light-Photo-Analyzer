@@ -1,0 +1,13 @@
+# Instalador do Luminance HDR (49 MB) — não precisa ir para o site
+*.exe
+
+# Dependências de desenvolvimento (Tailwind CLI)
+node_modules
+
+# Páginas PHP antigas de login/cadastro (a Vercel não executa PHP
+# e connect.php tem dados do banco local)
+*.php
+php
+
+# Fotos de teste do processamento HDR
+HDR/uploads
